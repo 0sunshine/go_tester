@@ -1,0 +1,29 @@
+log:
+  #6 TraceLevel
+  #5 DebugLevel
+  #4 InfoLevel
+  #3 WarnLevel
+  #2 ErrorLevel
+  #1 FatalLevel
+  #0 PanicLevel
+  level: 4
+
+play: #数组
+    - playList: "./vod.txt" #播放列表路径
+      playListSelectType: 1 #播放列表的选择方式: 0 顺序  1随机
+      sessMin: 1
+      sessMax: 1
+      sessIncreaseSpeed: 5     
+      sessBytesPerSec: 8048576 #1MB/s
+      sessContinuousPlayTime: 3600 #连续拉流多少秒后触发休息
+      sessPauseTime: 0 #休息多少秒后继续拉流
+      sessRepeat: 1
+    - playList: ""
+      playListSelectType: 1 #播放列表的选择方式: 0 顺序  1随机
+      sessMin: 0               
+      sessMax: 0               
+      sessIncreaseSpeed: 0     
+      sessBytesPerSec: 0       
+      sessContinuousPlayTime: 0
+      sessPauseTime: 0
+      sessRepeat: 1
