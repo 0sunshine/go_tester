@@ -11,14 +11,24 @@ import (
 )
 
 var (
-	SessionNumFlag int
+	//SessionNumFlag int
+	version string = "v1.0.3"
 )
 
-func ini_flag() {
-	flag.IntVar(&SessionNumFlag, "session_num", 100, "启动的连接会话数")
-
+func ini_flag() bool {
+	//flag.IntVar(&SessionNumFlag, "session_num", 100, "启动的连接会话数")
+	var showVer bool
+	flag.BoolVar(&showVer, "v", false, "print version")
 	flag.Parse()
-	fmt.Println("session_num: ", SessionNumFlag)
+
+	if showVer {
+		fmt.Println("version: ", version)
+		return false
+	}
+
+	//fmt.Println("session_num: ", SessionNumFlag)
+
+	return true
 }
 
 var logFile *lumberjack.Logger
@@ -35,6 +45,7 @@ func init_log() {
 	}
 
 	logrus.SetOutput(logFile)
+	//logrus.SetOutput(os.Stdout)
 
 	// Only log the warning severity or above.
 	logrus.SetLevel(logrus.Level(Conf.Log.Level))
@@ -58,10 +69,22 @@ func waitForQuit() {
 }
 
 func main() {
-	//ini_flag()
-	LoadConf()
+	if !ini_flag() {
+		return
+	}
+
+	err := LoadConf()
+	if err != nil {
+		return
+	}
+
 	init_log()
-	defer logFile.Close()
+	defer func() {
+		err := logFile.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
 
 	DoSessDispatch()
 	go StartBackendWebServer()
