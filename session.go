@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -19,6 +20,7 @@ type Session struct {
 	sessRepeat   int
 	workLimiter  IWorkLimiter
 	sessDispatch *SessDispatch
+	lastTsUrl    string
 }
 
 func NewSession(id string, sessDispatch *SessDispatch, limitRate int, sessRepeat int, workLimiter IWorkLimiter) *Session {
@@ -29,6 +31,7 @@ func NewSession(id string, sessDispatch *SessDispatch, limitRate int, sessRepeat
 		sessRepeat:   sessRepeat,
 		workLimiter:  workLimiter,
 		sessDispatch: sessDispatch,
+		lastTsUrl:    "",
 	}
 }
 
@@ -121,16 +124,42 @@ func (sess *Session) doDownloadUrl() error {
 	//开始下载每一个ts
 	mediapl := p.(*m3u8.MediaPlaylist)
 
+	argIdx := strings.LastIndex(sess.currUrl, "?")
+	replaceUrl := sess.currUrl
+	if argIdx != -1 {
+		replaceUrl = replaceUrl[:argIdx]
+	}
+
+	//下载的ts切片列表
+	tsUrlList := []string{}
+
+	//直播多次获取m3u8，移除已经下载过的
 	for _, seg := range mediapl.Segments {
 		if seg == nil {
 			continue
 		}
 
-		ts_url, err := ReplaceLastTokenInUrlPath(sess.currUrl, seg.URI)
+		ts_url, err := ReplaceLastTokenInUrlPath(replaceUrl, seg.URI)
 		if err != nil {
 			logrus.Error(err)
-			return err
+			break
 		}
+
+		if ts_url == sess.lastTsUrl {
+			tsUrlList = []string{}
+			continue
+		}
+
+		tsUrlList = append(tsUrlList, ts_url)
+	}
+
+	if len(tsUrlList) == 0 {
+		time.Sleep(time.Second * 5)
+	}
+
+	for _, ts_url := range tsUrlList {
+
+		sess.lastTsUrl = ts_url
 
 		sess.workLimiter.WorkWait()
 
@@ -153,7 +182,12 @@ func (sess *Session) doDownloadUrl() error {
 
 	atomic.AddInt64(&DSsessionOnlineNum, -1)
 
-	sess.currUrl = ""
+	//live
+	if mediapl.MediaType == m3u8.EVENT {
+		return nil
+	} else {
+		sess.currUrl = ""
+	}
 
 	return nil
 }
