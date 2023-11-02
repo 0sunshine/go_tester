@@ -12,7 +12,7 @@ import (
 
 var (
 	//SessionNumFlag int
-	version string = "v1.0.3"
+	version string = "v1.1.0"
 )
 
 func ini_flag() bool {
