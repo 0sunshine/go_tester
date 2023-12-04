@@ -13,8 +13,10 @@ import (
 )
 
 type SessDispatch struct {
-	playConf PlayYamlConf
-	playList []string
+	playConf      PlayYamlConf
+	playList      []string
+	currIdx       int
+	playListMutex sync.Mutex
 }
 
 func (this *SessDispatch) getPlayList() {
@@ -43,14 +45,10 @@ func (this *SessDispatch) getPlayList() {
 	}
 }
 
-var currIdx int = 0
-
-var playListMutex sync.Mutex
-
 func (this *SessDispatch) getUrlFromPlayList() (string, error) {
 
-	playListMutex.Lock()
-	defer playListMutex.Unlock()
+	this.playListMutex.Lock()
+	defer this.playListMutex.Unlock()
 
 	url := ""
 	useIdx := 0
@@ -58,11 +56,11 @@ func (this *SessDispatch) getUrlFromPlayList() (string, error) {
 	switch this.playConf.PlayListSelectType {
 	case 0:
 		{ //顺序]
-			useIdx = currIdx
-			if currIdx >= (len(this.playList) - 1) {
-				currIdx = 0
+			useIdx = this.currIdx
+			if this.currIdx >= (len(this.playList) - 1) {
+				this.currIdx = 0
 			} else {
-				currIdx++
+				this.currIdx++
 			}
 
 			break
