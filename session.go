@@ -35,6 +35,11 @@ func NewSession(id string, sessDispatch *SessDispatch, limitRate int, sessRepeat
 	}
 }
 
+type TsSegment struct {
+	url    string
+	extinf int64 //播放时长毫秒
+}
+
 func (sess *Session) doDownloadTs(ts_url string) error {
 	logrus.Info("id:[", sess.id, "]--download ts: ", ts_url)
 
@@ -47,6 +52,7 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 
 	if resp.StatusCode != http.StatusOK {
 		logrus.Error("id:]", sess.id, "]--Failed to download the file. HTTP Status Code: ", resp.StatusCode)
+		return errors.New("err: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	limiter := NewRateLimiter(sess.limitRate)
@@ -131,7 +137,7 @@ func (sess *Session) doDownloadUrl() error {
 	}
 
 	//下载的ts切片列表
-	tsUrlList := []string{}
+	tsSegmentList := []TsSegment{}
 
 	//直播多次获取m3u8，移除已经下载过的
 	for _, seg := range mediapl.Segments {
@@ -146,25 +152,31 @@ func (sess *Session) doDownloadUrl() error {
 		}
 
 		if ts_url == sess.lastTsUrl {
-			tsUrlList = []string{}
+			tsSegmentList = []TsSegment{} //去除前面已经下载过的
 			continue
 		}
 
-		tsUrlList = append(tsUrlList, ts_url)
+		tsSegment := TsSegment{
+			url:    ts_url,
+			extinf: -1,
+		}
+
+		tsSegment.extinf = int64(seg.Duration * 1000)
+		tsSegmentList = append(tsSegmentList, tsSegment)
 	}
 
-	if len(tsUrlList) == 0 {
-		time.Sleep(time.Second * 5)
+	if len(tsSegmentList) == 0 {
+		time.Sleep(time.Second * 3) //没有切片, 等3s再请求
 	}
 
-	for _, ts_url := range tsUrlList {
+	for _, tsSegment := range tsSegmentList {
 
-		sess.lastTsUrl = ts_url
+		sess.lastTsUrl = tsSegment.url
 
 		sess.workLimiter.WorkWait()
 
 		tsDownloadStartTime := time.Now().UnixMilli()
-		err = sess.doDownloadTs(ts_url)
+		err = sess.doDownloadTs(tsSegment.url)
 		tsDownloadEndTime := time.Now().UnixMilli()
 		tsDownloadMs := tsDownloadEndTime - tsDownloadStartTime
 		atomic.AddInt64(&DStsDownloadTotalNum, 1)
@@ -178,6 +190,9 @@ func (sess *Session) doDownloadUrl() error {
 
 		AddTsDownloadSpeedTime(err, tsDownloadMs)
 		atomic.AddInt64(&DStsDownloadSuccessNum, 1)
+		if tsDownloadMs < tsSegment.extinf {
+			time.Sleep(time.Millisecond * time.Duration(tsSegment.extinf-tsDownloadMs))
+		}
 	}
 
 	atomic.AddInt64(&DSsessionOnlineNum, -1)
