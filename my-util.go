@@ -13,6 +13,9 @@ func ReplaceLastTokenInUrlPath(url_in string, token string) (string, error) {
 		return "", err
 	}
 
+	u.RawQuery = ""
+	//url_in里面的？也去掉
+
 	s := strings.Split(u.Path, "/")
 	s = append(s[:len(s)-1], token)
 	u.Path = strings.Join(s, "/")

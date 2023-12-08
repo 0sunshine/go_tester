@@ -58,7 +58,7 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 	limiter := NewRateLimiter(sess.limitRate)
 
 	// Read and discard the content
-	buf := make([]byte, 1024*4) //4k
+	buf := make([]byte, 1024*64) //64k
 	for {
 		n, err := resp.Body.Read(buf)
 

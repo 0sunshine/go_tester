@@ -84,11 +84,10 @@ func (this *SessDispatch) getUrlFromPlayList() (string, error) {
 
 func (this *SessDispatch) do() {
 	this.getPlayList()
-
 	for i := 0; i < this.playConf.SessMax; i++ {
 
 		if i > this.playConf.SessMin {
-			time.Sleep(time.Duration(this.playConf.SessIncreaseSpeed) * time.Second)
+			time.Sleep(time.Duration(this.playConf.SessIncreaseSpeed) * time.Millisecond)
 		}
 
 		s := NewSession(strconv.Itoa(i), this, this.playConf.SessBytesPerSec, this.playConf.SessRepeat, &WorkLimiter{

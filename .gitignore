@@ -1,2 +1,4 @@
 go_tester
 index.html
+.idea/
+go_test_log.txt
