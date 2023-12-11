@@ -166,7 +166,7 @@ func (sess *Session) doDownloadUrl() error {
 	}
 
 	if len(tsSegmentList) == 0 {
-		time.Sleep(time.Second * 3) //没有切片, 等3s再请求
+		time.Sleep(time.Millisecond * 200) //没有切片, 等200ms再请求
 	}
 
 	for _, tsSegment := range tsSegmentList {
@@ -198,7 +198,7 @@ func (sess *Session) doDownloadUrl() error {
 	atomic.AddInt64(&DSsessionOnlineNum, -1)
 
 	//live
-	if mediapl.MediaType == m3u8.EVENT {
+	if mediapl.Closed == false {
 		return nil
 	} else {
 		sess.currUrl = ""
