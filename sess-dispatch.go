@@ -45,6 +45,8 @@ func (this *SessDispatch) getPlayList() {
 	}
 }
 
+var hasUseSeed bool = false
+
 func (this *SessDispatch) getUrlFromPlayList() (string, error) {
 
 	this.playListMutex.Lock()
@@ -68,6 +70,18 @@ func (this *SessDispatch) getUrlFromPlayList() (string, error) {
 
 	case 1:
 		{ //随机
+			useIdx = rand.Int() % len(this.playList)
+		}
+
+	case 2:
+		{ //随机
+
+			if hasUseSeed != true {
+				seed := time.Now().UnixNano()
+				rand.Seed(seed)
+				hasUseSeed = true
+			}
+
 			useIdx = rand.Int() % len(this.playList)
 		}
 

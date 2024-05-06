@@ -12,7 +12,7 @@ listen: 18080
 
 play: #数组
     - playList: "./vod.txt" #播放列表路径
-      playListSelectType: 0 #播放列表的选择方式: 0 顺序  1随机
+      playListSelectType: 0 #播放列表的选择方式: 0顺序  1随机(每次重启不设置时间种子)  2.随机(每次重启设置时间种子)
       sessMin: 1
       sessMax: 10
       sessIncreaseSpeed: 5     
