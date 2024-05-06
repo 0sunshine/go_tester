@@ -8,17 +8,19 @@ log:
   #0 PanicLevel
   level: 4
 
+listen: 18080
+
 play: #数组
-    - playList: "./live.txt" #播放列表路径
+    - playList: "./vod.txt" #播放列表路径
       playListSelectType: 0 #播放列表的选择方式: 0 顺序  1随机
       sessMin: 1
-      sessMax: 1
+      sessMax: 10
       sessIncreaseSpeed: 5     
       sessBytesPerSec: 10485760 #1MB/s
       sessContinuousPlayTime: 3600 #连续拉流多少秒后触发休息
       sessPauseTime: 0 #休息多少秒后继续拉流
       sessRepeat: 1
-    - playList: "./vod.txt"
+    - playList: ""
       playListSelectType: 0 #播放列表的选择方式: 0 顺序  1随机
       sessMin: 1
       sessMax: 1

@@ -36,7 +36,7 @@ var logFile *lumberjack.Logger
 func init_log() {
 	// Output to stdout instead of the default stderr
 	// Can be any io.Writer, see below for File example
-	logFile := &lumberjack.Logger{
+	logFile = &lumberjack.Logger{
 		Filename:   "go_test_log.txt",
 		MaxSize:    50, // MB
 		MaxBackups: 10,
@@ -45,7 +45,7 @@ func init_log() {
 	}
 
 	logrus.SetOutput(logFile)
-	logrus.SetOutput(os.Stdout)
+	//logrus.SetOutput(os.Stdout)
 
 	// Only log the warning severity or above.
 	logrus.SetLevel(logrus.Level(Conf.Log.Level))

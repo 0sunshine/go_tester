@@ -28,8 +28,9 @@ type LogYamlConf struct {
 }
 
 type YamlConf struct {
-	Log  LogYamlConf    `yaml:"log"`
-	Play []PlayYamlConf `yaml:"play"`
+	Log    LogYamlConf    `yaml:"log"`
+	Listen int            `yaml:"listen"`
+	Play   []PlayYamlConf `yaml:"play"`
 }
 
 var Conf YamlConf

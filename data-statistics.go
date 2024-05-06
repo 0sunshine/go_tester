@@ -116,7 +116,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func StartBackendWebServer() {
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":18080", nil))
+
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(Conf.Listen), nil))
 }
 
 func AddTsDownloadSpeedTime(err error, ms int64) {
