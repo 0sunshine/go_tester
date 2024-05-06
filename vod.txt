@@ -1,9 +1,1 @@
-http://192.168.6.123:19090/vod/wasu/73646/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73647/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73648/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73649/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73650/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73651/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73652/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73653/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73654/index.m3u8
+http://192.168.6.200:9090/vod/wasu/45493/index.m3u8?innersid=10001

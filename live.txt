@@ -1,2 +1,1 @@
-http://192.168.6.123:19090/live/emmm/10000/index.m3u8?innersid=10001
-http://192.168.6.123:19090/live/emmm/10000/index.m3u8?innersid=10002
+http://192.168.6.200:9090/vod/wasu/45493/index.m3u8?innersid=10001

@@ -3,10 +3,13 @@ package main
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"github.com/grafov/m3u8"
 	"github.com/sirupsen/logrus"
-	"io"
+	"github.com/valyala/fasthttp"
 	"net/http"
+	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -40,37 +43,84 @@ type TsSegment struct {
 	extinf int64 //播放时长毫秒
 }
 
+var client *fasthttp.Client
+
+func init() {
+	// You may read the timeouts from some config
+	readTimeout, _ := time.ParseDuration("10000ms")
+	writeTimeout, _ := time.ParseDuration("10000ms")
+	maxIdleConnDuration, _ := time.ParseDuration("1h")
+	client = &fasthttp.Client{
+		ReadTimeout:                   readTimeout,
+		WriteTimeout:                  writeTimeout,
+		MaxIdleConnDuration:           maxIdleConnDuration,
+		NoDefaultUserAgentHeader:      true, // Don't send: User-Agent: fasthttp
+		DisableHeaderNamesNormalizing: true, // If you set the case on your headers correctly you can enable this
+		DisablePathNormalizing:        true,
+		// increase DNS cache time to an hour instead of default minute
+		Dial: (&fasthttp.TCPDialer{
+			Concurrency:      10000,
+			DNSCacheDuration: time.Hour,
+		}).Dial,
+	}
+}
+
+func sendGetRequest() {
+	req := fasthttp.AcquireRequest()
+	req.SetRequestURI("http://localhost:8080/")
+	req.Header.SetMethod(fasthttp.MethodGet)
+	resp := fasthttp.AcquireResponse()
+
+	err := client.Do(req, resp)
+	fasthttp.ReleaseRequest(req)
+	if err == nil {
+		fmt.Printf("DEBUG Response: %s\n", resp.Body())
+	} else {
+		fmt.Fprintf(os.Stderr, "ERR Connection error: %v\n", err)
+	}
+	fasthttp.ReleaseResponse(resp)
+}
+
+func httpConnError(err error) (string, bool) {
+	var (
+		errName string
+		known   = true
+	)
+
+	switch {
+	case errors.Is(err, fasthttp.ErrTimeout):
+		errName = "timeout"
+	case errors.Is(err, fasthttp.ErrNoFreeConns):
+		errName = "conn_limit"
+	case errors.Is(err, fasthttp.ErrConnectionClosed):
+		errName = "conn_close"
+	case reflect.TypeOf(err).String() == "*net.OpError":
+		errName = "timeout"
+	default:
+		known = false
+	}
+
+	return errName, known
+}
+
 func (sess *Session) doDownloadTs(ts_url string) error {
 	logrus.Info("id:[", sess.id, "]--download ts: ", ts_url)
 
-	resp, err := http.Get(ts_url)
-	if err != nil {
-		logrus.Error("id:[", sess.id, "]--Error downloading: ", err)
-		return err
+	req := fasthttp.AcquireRequest()
+	req.SetRequestURI(ts_url)
+	req.Header.SetMethod(fasthttp.MethodGet)
+	resp := fasthttp.AcquireResponse()
+
+	err := client.Do(req, resp)
+	fasthttp.ReleaseRequest(req)
+
+	if err == nil {
+		logrus.Info("download ts ok, filesize: ", len(resp.Body()))
+	} else {
+		logrus.Error("id:]", sess.id, "]--Failed to download the file. HTTP Status Code: ", resp.StatusCode())
+		return errors.New("err: " + strconv.Itoa(resp.StatusCode()))
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		logrus.Error("id:]", sess.id, "]--Failed to download the file. HTTP Status Code: ", resp.StatusCode)
-		return errors.New("err: " + strconv.Itoa(resp.StatusCode))
-	}
-
-	limiter := NewRateLimiter(sess.limitRate)
-
-	// Read and discard the content
-	buf := make([]byte, 1024*64) //64k
-	for {
-		n, err := resp.Body.Read(buf)
-
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			logrus.Error("[id:", sess.id, "]--Failed to download, err: ", err)
-			return err
-		}
-
-		limiter.Limit(int64(n))
-	}
+	fasthttp.ReleaseResponse(resp)
 
 	return nil
 }
