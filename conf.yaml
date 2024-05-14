@@ -14,7 +14,7 @@ play: #数组
     - playList: "./vod.txt" #播放列表路径
       playListSelectType: 0 #播放列表的选择方式: 0顺序  1随机(每次重启不设置时间种子)  2.随机(每次重启设置时间种子)
       sessMin: 1
-      sessMax: 10
+      sessMax: 1
       sessIncreaseSpeed: 5     
       sessBytesPerSec: 10485760 #1MB/s
       sessContinuousPlayTime: 3600 #连续拉流多少秒后触发休息

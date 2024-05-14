@@ -58,7 +58,7 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 	limiter := NewRateLimiter(sess.limitRate)
 
 	// Read and discard the content
-	buf := make([]byte, 1024*64) //64k
+	buf := make([]byte, 1024*512) //64k
 	for {
 		n, err := resp.Body.Read(buf)
 
@@ -75,7 +75,51 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 	return nil
 }
 
-func (sess *Session) doDownloadUrl() error {
+func (sess *Session) doDownloadFile() error {
+	logrus.Info("id:[", sess.id, "]--download file: ", sess.currUrl)
+
+	atomic.AddInt64(&DSsessionOnlineNum, 1)
+	defer atomic.AddInt64(&DSsessionOnlineNum, -1)
+	defer atomic.AddInt64(&DStsDownloadTotalNum, 1)
+
+	resp, err := http.Get(sess.currUrl)
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		atomic.AddInt64(&DStsDownloadFailedNum, 1)
+		logrus.Error("id:]", sess.id, "]--Failed to download the file. HTTP Status Code: ", resp.StatusCode)
+		return errors.New("err: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	limiter := NewRateLimiter(sess.limitRate)
+
+	// Read and discard the content
+	buf := make([]byte, 1024*512) //64k
+	for {
+		n, err := resp.Body.Read(buf)
+
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			logrus.Error("[id:", sess.id, "]--Failed to download, err: ", err)
+			atomic.AddInt64(&DStsDownloadFailedNum, 1)
+			return err
+		}
+
+		limiter.Limit(int64(n))
+	}
+
+	atomic.AddInt64(&DStsDownloadSuccessNum, 1)
+
+	return nil
+}
+
+func (sess *Session) doDownloadHlsUrl() error {
 	resp, err := http.Get(sess.currUrl)
 	if err != nil {
 		logrus.Error(err)
@@ -219,10 +263,15 @@ func (sess *Session) Do() {
 			}
 		}
 
-		sess.doDownloadUrl()
-
-		if sess.sessRepeat == 0 {
-			break
+		if strings.Contains(sess.currUrl, ".m3u8") {
+			err = sess.doDownloadHlsUrl()
+		} else {
+			err = sess.doDownloadFile()
 		}
+
+		if err != nil {
+			time.Sleep(time.Second * 1)
+		}
+
 	}
 }

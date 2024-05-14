@@ -1,9 +1,1 @@
-http://192.168.6.123:19090/vod/wasu/73646/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73647/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73648/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73649/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73650/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73651/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73652/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73653/index.m3u8
-http://192.168.6.123:19090/vod/wasu/73654/index.m3u8
+http://apk.avitcdn.com:9090/apk/10103/upgrade.apk?cache0=MY8RSWBbc6U0grqhEQGaf71iVyeso2TK&cache1=mfGtdX10xho5ZHI4bArkjDn38WJwCNYS&cache2=JO6lkbWvUMjBCKtTirHGP0ysNoczQqAx&cache3=hJR1wkdo58tBnN9jvrCb3Lqcg4T2SYse
