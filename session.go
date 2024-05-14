@@ -137,6 +137,7 @@ func (sess *Session) doDownloadHlsUrl() error {
 		}
 
 		sess.currUrl = location.String()
+		logrus.Info("id:[", sess.id, "]--302 to: ", sess.currUrl)
 
 		return nil
 	}
