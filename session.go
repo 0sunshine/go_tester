@@ -121,7 +121,17 @@ func (sess *Session) doDownloadFile() error {
 
 func (sess *Session) doDownloadHlsUrl() error {
 	logrus.Info("id:[", sess.id, "]--download m3u8: ", sess.currUrl)
-	resp, err := http.Get(sess.currUrl)
+
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	req, err := http.NewRequest("GET", sess.currUrl, nil)
+
+	resp, err := client.Do(req)
+	
 	if err != nil {
 		logrus.Error(err)
 		return err
