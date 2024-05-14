@@ -120,6 +120,7 @@ func (sess *Session) doDownloadFile() error {
 }
 
 func (sess *Session) doDownloadHlsUrl() error {
+	logrus.Info("id:[", sess.id, "]--download m3u8: ", sess.currUrl)
 	resp, err := http.Get(sess.currUrl)
 	if err != nil {
 		logrus.Error(err)
