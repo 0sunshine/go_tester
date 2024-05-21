@@ -11,21 +11,27 @@ log:
 listen: 18080
 
 play: #数组
-    - playList: "./vod.txt" #播放列表路径
+    - playList: "./live.txt" #播放列表路径
       playListSelectType: 0 #播放列表的选择方式: 0顺序  1随机(每次重启不设置时间种子)  2.随机(每次重启设置时间种子)
+      useOffset: 0  #非0开启，对播放串补充offset=[1-该值]
+      usePlayback: 3600  #非0开启，对播放串补充start=该值内的随机时间&end=start+15分钟
       sessMin: 1
       sessMax: 1
       sessIncreaseSpeed: 5     
       sessBytesPerSec: 10485760 #1MB/s
       sessContinuousPlayTime: 3600 #连续拉流多少秒后触发休息
+      sessStopPlayTime: 1800 #播放多久后换另一个播放串
       sessPauseTime: 0 #休息多少秒后继续拉流
       sessRepeat: 1
     - playList: ""
       playListSelectType: 0 #播放列表的选择方式: 0 顺序  1随机
+      useOffset: 100  #非0开启，对播放串补充offset=[1-该值]
+      usePlayback: 3600  #非0开启，对播放串补充start=该值内的随机时间&end=start+10~30分钟
       sessMin: 1
       sessMax: 1
       sessIncreaseSpeed: 5
       sessBytesPerSec: 10485760 #1MB/s
       sessContinuousPlayTime: 3600 #连续拉流多少秒后触发休息
+      sessStopPlayTime: 1800 #播放多久后换另一个播放串
       sessPauseTime: 0 #休息多少秒后继续拉流
       sessRepeat: 1

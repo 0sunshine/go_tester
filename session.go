@@ -3,9 +3,11 @@ package main
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"github.com/grafov/m3u8"
 	"github.com/sirupsen/logrus"
 	"io"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,24 +16,33 @@ import (
 )
 
 type Session struct {
-	id           string
-	currUrl      string
-	limitRate    int64
-	sessRepeat   int
+	id               string
+	currUrl          string
+	limitRate        int64
+	sessRepeat       int
+	useOffset        int
+	usePlayback      int
+	sessStopPlayTime int
+
 	workLimiter  IWorkLimiter
 	sessDispatch *SessDispatch
 	lastTsUrl    string
+
+	currOnlineTime int
 }
 
-func NewSession(id string, sessDispatch *SessDispatch, limitRate int, sessRepeat int, workLimiter IWorkLimiter) *Session {
+func NewSession(id string, sessDispatch *SessDispatch, limitRate int, sessRepeat int, workLimiter IWorkLimiter, useOffset int, usePlayback int, sessStopPlayTime int) *Session {
 	return &Session{
-		id:           id,
-		currUrl:      "",
-		limitRate:    int64(limitRate),
-		sessRepeat:   sessRepeat,
-		workLimiter:  workLimiter,
-		sessDispatch: sessDispatch,
-		lastTsUrl:    "",
+		id:               id,
+		currUrl:          "",
+		limitRate:        int64(limitRate),
+		sessRepeat:       sessRepeat,
+		workLimiter:      workLimiter,
+		sessDispatch:     sessDispatch,
+		lastTsUrl:        "",
+		useOffset:        useOffset,
+		usePlayback:      usePlayback,
+		sessStopPlayTime: sessStopPlayTime,
 	}
 }
 
@@ -120,6 +131,38 @@ func (sess *Session) doDownloadFile() error {
 }
 
 func (sess *Session) doDownloadHlsUrl() error {
+
+	if strings.Contains(sess.currUrl, "offset=") == false && strings.Contains(sess.currUrl, "start=") == false && strings.Contains(sess.currUrl, "end=") == false {
+		if sess.useOffset > 0 {
+			r := rand.Int()%sess.useOffset + 1
+			if strings.Contains(sess.currUrl, "?") {
+				sess.currUrl += "&"
+			} else {
+				sess.currUrl += "?"
+			}
+			sess.currUrl += fmt.Sprintf("offset=%d", r)
+
+		} else if sess.usePlayback > 0 {
+			nowTmp := time.Now()
+			r := rand.Int() % sess.usePlayback
+
+			startTmp := nowTmp.Add(-time.Second * time.Duration(r))
+			endTmp := startTmp.Add(time.Second * 15 * 60)
+
+			if endTmp.After(nowTmp) {
+				endTmp = nowTmp
+			}
+
+			if strings.Contains(sess.currUrl, "?") {
+				sess.currUrl += "&"
+			} else {
+				sess.currUrl += "?"
+			}
+
+			sess.currUrl += fmt.Sprintf("start=%s&end=%s", startTmp.Format("20060102150405"), endTmp.Format("20060102150405"))
+		}
+	}
+
 	logrus.Info("id:[", sess.id, "]--download m3u8: ", sess.currUrl)
 
 	client := &http.Client{
@@ -128,10 +171,12 @@ func (sess *Session) doDownloadHlsUrl() error {
 		},
 	}
 
+	//m3u8Url := sess.currUrl
+
 	req, err := http.NewRequest("GET", sess.currUrl, nil)
 
 	resp, err := client.Do(req)
-	
+
 	if err != nil {
 		logrus.Error(err)
 		return err
@@ -249,6 +294,16 @@ func (sess *Session) doDownloadHlsUrl() error {
 		if tsDownloadMs < tsSegment.extinf {
 			time.Sleep(time.Millisecond * time.Duration(tsSegment.extinf-tsDownloadMs))
 		}
+
+		sess.currOnlineTime += int(tsSegment.extinf)
+
+		//到点退出, 换播放串
+		if sess.currOnlineTime/1000 > sess.sessStopPlayTime {
+			logrus.Info("id:[", sess.id, "]--sessStopPlayTime")
+			sess.currUrl = ""
+			sess.currOnlineTime = 0
+			return nil
+		}
 	}
 
 	atomic.AddInt64(&DSsessionOnlineNum, -1)
@@ -283,6 +338,7 @@ func (sess *Session) Do() {
 
 		if err != nil {
 			time.Sleep(time.Second * 1)
+			logrus.Info("id:[", sess.id, "]--err : ", err, "  url: ", sess.currUrl)
 		}
 
 	}

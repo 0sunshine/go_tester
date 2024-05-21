@@ -10,6 +10,8 @@ import (
 type PlayYamlConf struct {
 	PlayList           string `yaml:"playList"`
 	PlayListSelectType int    `yaml:"playListSelectType"`
+	UseOffset          int    `yaml:"useOffset"`
+	UsePlayback        int    `yaml:"usePlayback"`
 
 	SessMin           int `yaml:"sessMin"`
 	SessMax           int `yaml:"sessMax"`
@@ -19,6 +21,7 @@ type PlayYamlConf struct {
 
 	SessContinuousPlayTime int `yaml:"sessContinuousPlayTime"`
 	SessPauseTime          int `yaml:"sessPauseTime"`
+	SessStopPlayTime       int `yaml:"sessStopPlayTime"`
 
 	SessRepeat int `yaml:"sessRepeat"`
 }

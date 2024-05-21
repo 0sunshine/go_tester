@@ -1,2 +1,1 @@
-http://192.168.6.123:19090/live/emmm/10000/index.m3u8?innersid=10001
-http://192.168.6.123:19090/live/emmm/10000/index.m3u8?innersid=10002
+http://192.168.11.50:9090/live/cctv/test-4M-25/4000000/4000000.m3u8?cache0=ZakRzEbChfHvMNr2ndxVtSyg68X7BlWF&cache1=nf3PBMJXDArHQmzE84UxpY6NwTZaqOKW&cache2=Uw5GgDl0MTNCsBm81pIFSY4ZEPKvHWVb&cache3=OWHsMhSGfgLi5qCb3mRytXxa1BldrKP2

@@ -107,7 +107,7 @@ func (this *SessDispatch) do() {
 		s := NewSession(strconv.Itoa(i), this, this.playConf.SessBytesPerSec, this.playConf.SessRepeat, &WorkLimiter{
 			SessContinuousPlayTime: this.playConf.SessContinuousPlayTime,
 			SessPauseTime:          this.playConf.SessPauseTime,
-		})
+		}, this.playConf.UseOffset, this.playConf.UsePlayback, this.playConf.SessStopPlayTime)
 		go s.Do()
 	}
 }
