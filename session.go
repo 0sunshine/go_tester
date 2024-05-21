@@ -302,6 +302,7 @@ func (sess *Session) doDownloadHlsUrl() error {
 			logrus.Info("id:[", sess.id, "]--sessStopPlayTime")
 			sess.currUrl = ""
 			sess.currOnlineTime = 0
+			atomic.AddInt64(&DSsessionOnlineNum, -1)
 			return nil
 		}
 	}
