@@ -21,6 +21,11 @@ var tsDownloadSpeedTimeErrTotalms int64 = 0
 var tsDownloadSpeedTimers = []*tsDownloadSpeedTimer{
 	&tsDownloadSpeedTimer{
 		start: 0,
+		end:   1000,
+		count: 0,
+	},
+	&tsDownloadSpeedTimer{
+		start: 1000,
 		end:   2000,
 		count: 0,
 	},
@@ -31,12 +36,32 @@ var tsDownloadSpeedTimers = []*tsDownloadSpeedTimer{
 	},
 	&tsDownloadSpeedTimer{
 		start: 5000,
+		end:   5500,
+		count: 0,
+	},
+	&tsDownloadSpeedTimer{
+		start: 5500,
+		end:   6000,
+		count: 0,
+	},
+	&tsDownloadSpeedTimer{
+		start: 6000,
+		end:   7000,
+		count: 0,
+	},
+	&tsDownloadSpeedTimer{
+		start: 7000,
 		end:   8000,
 		count: 0,
 	},
 	&tsDownloadSpeedTimer{
 		start: 8000,
 		end:   10000,
+		count: 0,
+	},
+	&tsDownloadSpeedTimer{
+		start: 10000,
+		end:   12000,
 		count: 0,
 	},
 	&tsDownloadSpeedTimer{
