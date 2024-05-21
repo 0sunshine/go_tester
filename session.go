@@ -132,15 +132,15 @@ func (sess *Session) doDownloadFile() error {
 
 func (sess *Session) doDownloadHlsUrl() error {
 
-	if strings.Contains(sess.currUrl, "offset=") == false && strings.Contains(sess.currUrl, "start=") == false && strings.Contains(sess.currUrl, "end=") == false {
+	if strings.Contains(sess.currUrl, "shifttime=") == false && strings.Contains(sess.currUrl, "start=") == false && strings.Contains(sess.currUrl, "end=") == false {
 		if sess.useOffset > 0 {
-			r := rand.Int()%sess.useOffset + 1
+			r := rand.Int()%(sess.useOffset-15) + 15
 			if strings.Contains(sess.currUrl, "?") {
 				sess.currUrl += "&"
 			} else {
 				sess.currUrl += "?"
 			}
-			sess.currUrl += fmt.Sprintf("offset=%d", r)
+			sess.currUrl += fmt.Sprintf("shifttime=%d", r)
 
 		} else if sess.usePlayback > 0 {
 			nowTmp := time.Now()
