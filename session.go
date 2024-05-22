@@ -144,6 +144,8 @@ func (sess *Session) doDownloadHlsUrl() error {
 
 		} else if sess.usePlayback > 0 {
 			nowTmp := time.Now()
+			nowTmp.Add(-time.Second * 15)
+
 			r := rand.Int() % sess.usePlayback
 
 			startTmp := nowTmp.Add(-time.Second * time.Duration(r))
