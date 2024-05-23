@@ -89,11 +89,11 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 			return err
 		}
 
-		strLog := fmt.Sprint("[id:", sess.id, "]--recv too slow, totalRecvSize:[", totalRecvSize, "] recv size: [", n, "] currtime: [", endRead, "]ms, url: ", ts_url)
-		recvLog = append(recvLog, strLog)
-
 		totalRecvSize += int64(n)
 		spendTime := endRead - startRead
+		
+		strLog := fmt.Sprint("[id:", sess.id, "]--recv too slow, totalRecvSize:[", totalRecvSize, "] recv size: [", n, "] currtime: [", endRead, "]ms, url: ", ts_url)
+		recvLog = append(recvLog, strLog)
 
 		if spendTime > 200 {
 			logrus.Error("[id:", sess.id, "]--data spend to long: ", spendTime, ", url: ", ts_url)
