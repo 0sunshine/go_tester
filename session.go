@@ -72,6 +72,9 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 	buf := make([]byte, 1024*64) //64k
 
 	var allSpendTime int64 = 0
+	var totalRecvSize int64 = 0
+
+	recvLog := []string{}
 
 	for {
 
@@ -86,6 +89,10 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 			return err
 		}
 
+		strLog := fmt.Sprint("[id:", sess.id, "]--recv too slow, totalRecvSize:[", totalRecvSize, "] recv size: [", n, "] currtime: [", endRead, "]ms, url: ", ts_url)
+		recvLog = append(recvLog, strLog)
+
+		totalRecvSize += int64(n)
 		spendTime := endRead - startRead
 
 		if spendTime > 200 {
@@ -93,8 +100,12 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 		}
 
 		allSpendTime += spendTime
-		if allSpendTime > 1500 {
-			logrus.Error("[id:", sess.id, "]--recv too slow, recv size: [", n, "] currtime: [", endRead, "]ms, url: ", ts_url)
+		if allSpendTime > 2000 {
+			for _, v := range recvLog {
+				logrus.Error(v)
+			}
+
+			recvLog = []string{}
 		}
 
 		//limiter.Limit(int64(n))
