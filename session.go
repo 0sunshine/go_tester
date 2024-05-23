@@ -70,6 +70,9 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 
 	// Read and discard the content
 	buf := make([]byte, 1024*64) //64k
+
+	var allSpendTime int64 = 0
+
 	for {
 
 		startRead := time.Now().UnixMilli()
@@ -87,6 +90,11 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 
 		if spendTime > 200 {
 			logrus.Error("[id:", sess.id, "]--data spend to long: ", spendTime, ", url: ", ts_url)
+		}
+
+		allSpendTime += spendTime
+		if allSpendTime > 2000 {
+			logrus.Error("[id:", sess.id, "]--recv too slow, recv size: [", n, "] currtime: [", endRead, "]ms, url: ", ts_url)
 		}
 
 		limiter.Limit(int64(n))
