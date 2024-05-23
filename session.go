@@ -66,7 +66,7 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 		return errors.New("err: " + strconv.Itoa(resp.StatusCode))
 	}
 
-	limiter := NewRateLimiter(sess.limitRate)
+	//limiter := NewRateLimiter(sess.limitRate)
 
 	// Read and discard the content
 	buf := make([]byte, 1024*64) //64k
