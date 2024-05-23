@@ -93,11 +93,11 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 		}
 
 		allSpendTime += spendTime
-		if allSpendTime > 2000 {
+		if allSpendTime > 1500 {
 			logrus.Error("[id:", sess.id, "]--recv too slow, recv size: [", n, "] currtime: [", endRead, "]ms, url: ", ts_url)
 		}
 
-		limiter.Limit(int64(n))
+		//limiter.Limit(int64(n))
 	}
 
 	return nil
