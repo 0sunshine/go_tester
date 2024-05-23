@@ -69,15 +69,24 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 	limiter := NewRateLimiter(sess.limitRate)
 
 	// Read and discard the content
-	buf := make([]byte, 1024*512) //64k
+	buf := make([]byte, 1024*64) //64k
 	for {
+
+		startRead := time.Now().UnixMilli()
 		n, err := resp.Body.Read(buf)
+		endRead := time.Now().UnixMilli()
 
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			logrus.Error("[id:", sess.id, "]--Failed to download, err: ", err)
 			return err
+		}
+
+		spendTime := endRead - startRead
+
+		if spendTime > 200 {
+			logrus.Error("[id:", sess.id, "]--data spend to long: ", spendTime, ", url: ", ts_url)
 		}
 
 		limiter.Limit(int64(n))
