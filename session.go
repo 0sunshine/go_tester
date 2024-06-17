@@ -91,7 +91,7 @@ func (sess *Session) doDownloadTs(ts_url string) error {
 
 		totalRecvSize += int64(n)
 		spendTime := endRead - startRead
-		
+
 		strLog := fmt.Sprint("[id:", sess.id, "]--recv too slow, totalRecvSize:[", totalRecvSize, "] recv size: [", n, "] currtime: [", endRead, "]ms, url: ", ts_url)
 		recvLog = append(recvLog, strLog)
 
@@ -195,17 +195,23 @@ func (sess *Session) doDownloadHlsUrl() error {
 
 	logrus.Info("id:[", sess.id, "]--download m3u8: ", sess.currUrl)
 
-	client := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
+	var client *http.Client
+	var req *http.Request
+	var resp *http.Response
+	var err error
+
+	if Conf.RememberLocation == 1 {
+		client = &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		}
+
+		req, err = http.NewRequest("GET", sess.currUrl, nil)
+		resp, err = client.Do(req)
+	} else {
+		resp, err = http.Get(sess.currUrl)
 	}
-
-	//m3u8Url := sess.currUrl
-
-	req, err := http.NewRequest("GET", sess.currUrl, nil)
-
-	resp, err := client.Do(req)
 
 	if err != nil {
 		logrus.Error(err)

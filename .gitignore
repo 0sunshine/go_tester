@@ -3,3 +3,8 @@ index.html
 .idea/
 go_test_log.txt
 gotester
+go_tester_apk/
+go_tester_live/
+go_tester_offset/
+go_tester_playback/
+go_tester_vod/

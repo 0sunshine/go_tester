@@ -10,6 +10,9 @@ log:
 
 listen: 18080
 
+#是否记住m3u8重定向后的地址，后续切片直接往重定向后的地址发送
+rememberLocation: 1
+
 play: #数组
     - playList: "./live.txt" #播放列表路径
       playListSelectType: 0 #播放列表的选择方式: 0顺序  1随机(每次重启不设置时间种子)  2.随机(每次重启设置时间种子)
